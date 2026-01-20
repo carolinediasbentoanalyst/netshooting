@@ -591,11 +591,6 @@ if ($Zip) { Write-Host "ZIP:      $OutputDir.zip" }
 .PARAMETER Zip
   Compacta os resultados ao final.
 
-.EXAMPLE
-  .\Network-Troubleshoot.ps1 -Zip
-
-.EXAMPLE
-  .\Network-Troubleshoot.ps1 -Targets @("10.0.0.1","dc01.contoso.local","8.8.8.8") -TcpPorts 53,88,135,389,445,3389
 #>
 
 [CmdletBinding()]
@@ -629,8 +624,6 @@ function Write-Log {
     [ValidateSet("INFO","WARN","ERROR")][string]$Level = "INFO"
   )
   $line = "[{0:yyyy-MM-dd HH:mm:ss}] [{1}] {2}" -f (Get-Date), $Level, $Message
-
-  # IMPORTANTE: não pode vazar output para o pipeline (senão quebra retornos de funções)
   $line | Tee-Object -FilePath $global:MainLog -Append | Out-Null
 }
 
@@ -886,13 +879,6 @@ $report = [ordered]@{
     psVersion = $PSVersionTable.PSVersion.ToString()
     os = $null
   }
-# --------------------------
-# Public IP (ipify) -> salva em TXT
-# --------------------------
-$publicIpFile = Join-Path $SubDirs.Info "public_ip_ipify.txt"
-$publicIp = Get-PublicIPToFile -FilePath $publicIpFile
-$report.networkInfo.publicIp = $publicIp
-
   networkInfo = [ordered]@{}
   tests = [ordered]@{
     icmp = @()
@@ -903,6 +889,13 @@ $report.networkInfo.publicIp = $publicIp
   }
   errors = @()
 }
+
+# --------------------------
+# Public IP (ipify) -> salva em TXT
+# --------------------------
+$publicIpFile = Join-Path $SubDirs.Info "public_ip_ipify.txt"
+$publicIp = Get-PublicIPToFile -FilePath $publicIpFile
+$report.networkInfo.publicIp = $publicIp
 
 # --------------------------
 # Collect OS
